@@ -7,9 +7,9 @@ import Employees from "./pages/Employees"
 import Attendance from "./pages/Attendance"
 import Leave from "./pages/Leave"
 import PaySlips from "./pages/PaySlips"
-import { Settings } from "lucide-react"
 import PrintPaySlip from "./pages/PrintPaySlip"
 import LoginForm from "./components/LoginForm"
+import Settings from "./pages/Settings"
 
 const App = () => {
   return (
@@ -30,7 +30,7 @@ const App = () => {
           <Route path="/payslips" element={<PaySlips />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
-        <Route path="/print/payslip/:id" element={<PrintPaySlip />} />
+        <Route path="/print/payslips/:id" element={<PrintPaySlip />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </>
