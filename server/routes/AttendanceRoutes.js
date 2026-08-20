@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { protect } from '../middleware/authMiddleware.js';
-import { clockInOut, getAttendance } from '../controllers/AttendanceController';
+import { protect } from '../middleware/Auth.js';
+import { clockInOut, getAttendance } from '../controllers/AttendanceController.js';
 
 const attendanceRoutes = Router();
 
