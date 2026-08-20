@@ -1,5 +1,5 @@
 import Employee from "../models/Employee.js";
-import LeaveApplication from "../models/LeaveApplication";
+import LeaveApplication from "../models/LeaveApplication.js";
 
 export const createLeave = async (req, res) => {
 
@@ -46,7 +46,7 @@ export const getLeaves = async (req, res) => {
 
     try {
         const session = req.session;
-        const isAdmin = session.role === 'admin';
+        const isAdmin = session.role === 'ADMIN';
         if (isAdmin) {
             const status = req.query.status;
             const where = status ? { status } : {};
