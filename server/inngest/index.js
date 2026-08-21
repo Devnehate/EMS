@@ -122,7 +122,7 @@ const attendanceReminderCron = inngest.createFunction(
                     sendEmail({
                         to: emp.email,
                         subject: "Attendance Reminder - please mark your attendance",
-                        body: <div style="max-width: 600px; font-family: Arial, sans-serif;">
+                        body: `<div style="max-width: 600px; font-family: Arial, sans-serif;">
                             <h2>Hi ${emp.firstName}, 👋</h2>
                             <p style="font-size: 16px;">We noticed you haven't marked your attendance yet today.</p>
                             <p style="font-size: 16px;">The deadline was <strong>11:30 AM</strong> and your attendance is still missing.</p>
@@ -132,7 +132,7 @@ const attendanceReminderCron = inngest.createFunction(
                             <br />
                             <p style="font-size: 16px;">Best Regards,</p>
                             <p style="font-size: 16px;"><strong>QuickEMS</strong></p>
-                        </div>
+                        </div>`
                     })
 
                 })
