@@ -1,8 +1,8 @@
-import { DEPARTMENTS } from "../constants/Departments";
-import Attendance from "../models/Attendance";
-import Employee from "../models/Employee";
-import LeaveApplication from "../models/LeaveApplication";
-import Payslip from "../models/Payslip";
+import { DEPARTMENTS } from "../constants/Departments.js";
+import Attendance from "../models/Attendance.js";
+import Employee from "../models/Employee.js";
+import LeaveApplication from "../models/LeaveApplication.js";
+import Payslip from "../models/Payslip.js";
 
 
 export const getDashboard = async (req, res) => {
