@@ -2,6 +2,8 @@
 import { format } from "date-fns";
 import { Check, Loader2, X } from "lucide-react";
 import { useState } from "react";
+import api from "../../api/Axios";
+import toast from "react-hot-toast";
 
 const LeaveHistory = ({ leaves, isAdmin, onUpdate }) => {
 
@@ -9,6 +11,14 @@ const LeaveHistory = ({ leaves, isAdmin, onUpdate }) => {
 
     const handleStatusUpdate = async (id, status) => {
         setProcessing(id);
+        try {
+            await api.patch(`/leaves/${id}`, { status });
+            onUpdate();
+        } catch (error) {
+            toast.error(error?.response?.data?.error || error.message);
+        } finally {
+            setProcessing(null);
+        }
     }
 
     return (
@@ -60,7 +70,7 @@ const LeaveHistory = ({ leaves, isAdmin, onUpdate }) => {
                                         </td>
                                         {isAdmin && (
                                             <td>
-                                                {leaves.status === "PENDING" && (
+                                                {leave.status === "PENDING" && (
                                                     <div className="flex justify-center gap-2">
                                                         <button onClick={() => handleStatusUpdate(leave._id || leave.id, "APPROVED")}
                                                             disabled={!!processing}

@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { Loader2, Plus, X } from "lucide-react";
 import { useState } from "react"
+import api from "../../api/Axios";
+import toast from "react-hot-toast";
 
 const GeneratePayslipForm = ({ employees, onSuccess }) => {
 
@@ -15,6 +17,18 @@ const GeneratePayslipForm = ({ employees, onSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        const formData = new FormData(e.currentTarget);
+        const data = Object.fromEntries(formData.entries());
+        try {
+            await api.post('/payslips', data);
+            setIsOpen(false);
+            onSuccess();
+        } catch (error) {
+            toast.error(error?.response?.data?.error || error.message);
+        }
+        setLoading(false);
+
     }
 
     return (
@@ -70,9 +84,9 @@ const GeneratePayslipForm = ({ employees, onSuccess }) => {
                         </div>
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
-                        <button className="btn-secondary" type="button" onClick={()=>setIsOpen(false)}>Cancel</button>
+                        <button className="btn-secondary" type="button" onClick={() => setIsOpen(false)}>Cancel</button>
                         <button className="btn-primary flex items-center" disabled={loading} type="submit">
-                                {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                             Generate
                         </button>
                     </div>

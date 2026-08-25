@@ -14,7 +14,7 @@ export const clockInOut = async (req, res) => {
         const existing = await Attendance.findOne({ employeeId: employee._id, date: today });
 
         const now = new Date();
-        if (existing) {
+       if (!existing || !existing.checkIn) {
             const isLate = now.getHours() >= 9 && now.getMinutes() > 0;
             const attendance = await Attendance.create({
                 employeeId: employee._id,
@@ -33,7 +33,7 @@ export const clockInOut = async (req, res) => {
 
             return res.status(200).json({ success: true, type: 'CHECK_IN', data: attendance });
         }
-        else if (!existing.checkOut) {
+       else if (existing && !existing.checkOut) {
             const checkInTime = new Date(existing.checkIn).getTime();
             const diffMs = now.getTime() - checkInTime;
             const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
