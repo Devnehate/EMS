@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { Loader2, LockIcon, X } from "lucide-react";
 import { useState } from "react"
+import api from "../api/Axios";
 
 const ChangePasswordModel = ({ open, onClose }) => {
 
@@ -9,6 +10,22 @@ const ChangePasswordModel = ({ open, onClose }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setMessage({ type: "", text: "" })
+        const formData = new FormData(e.currentTarget);
+        const currentPassword = formData.get("currentPassword");
+        const newPassword = formData.get("newPassword");
+
+        try {
+            const { data } = await api.post('/auth/change-password', { currentPassword, newPassword });
+            if (!data.success) throw new Error(data.message || "Failed to change password");
+            setMessage({ type: "success", text: "Password changed successfully" });
+            e.target.reset();
+        } catch (error) {
+            setMessage({ type: "error", text: error.message });
+        } finally {
+            setLoading(false);
+        }
     }
 
     if (!open) return null;
@@ -29,7 +46,7 @@ const ChangePasswordModel = ({ open, onClose }) => {
                 <form className="p-6 space-y-5" onSubmit={handleSubmit}>
                     {message.text && (
                         <div className={`p-3 rounded-xl text-sm flex items-start gap-3 ${message.type === 'success' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-rose-50 border border-rose-200 text-rose-700'}`}>
-                            <divc className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${message.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                            <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${message.type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
                             {message.text}
                         </div>
                     )}

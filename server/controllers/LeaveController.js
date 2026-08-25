@@ -90,7 +90,7 @@ export const updateLeave = async (req, res) => {
             return res.status(400).json({ message: 'Invalid status' });
         }
 
-        const leave = await LeaveApplication.findById(req.params.id, { status }, { returnDocument: 'after' });
+        const leave = await LeaveApplication.findByIdAndUpdate(req.params.id, { status }, { returnDocument: 'after' });
         return res.json({ success: true, data: leave });
     } catch (error) {
         res.status(500).json({ error: 'Failed' });

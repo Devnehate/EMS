@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { Loader2, Save, User } from "lucide-react";
 import { useState } from "react"
+import api from "../api/Axios";
+import toast from "react-hot-toast";
 
 const ProfileForm = ({ initialData, onSuccess }) => {
 
@@ -10,6 +12,19 @@ const ProfileForm = ({ initialData, onSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError("");
+        setMessage("");
+        const formData = new FormData(e.currentTarget);
+        try {
+            await api.post('/profile', formData);
+            setMessage("Profile updated successfully");
+            onSuccess();
+        } catch (error) {
+            toast.error(error?.response?.data?.error || error.message);
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -48,7 +63,15 @@ const ProfileForm = ({ initialData, onSuccess }) => {
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Bio</label>
-                    <textarea disabled value={initialData.isDeleted} name="bio" defaultValue={initialData.bio || ""} placeholder="Write a brief bio..." className={`resize-none ${initialData.isDeleted ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''}`} />
+                    <textarea
+                        name="bio"
+                        defaultValue={initialData.bio || ""}
+                        placeholder="Write a brief bio..."
+                        className={`resize-none ${initialData.isDeleted
+                                ? "bg-slate-50 text-slate-400 cursor-not-allowed"
+                                : ""
+                            }`}
+                    />
                     <p className="text-xs text-slate-400 mt-1.5">This will be displayed on your profile.</p>
                 </div>
                 {initialData.isDeleted ? (

@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { CalendarDays, FileText, Loader2, Send, X } from "lucide-react";
 import { useState } from "react";
+import api from "../../api/Axios";
+import toast from "react-hot-toast";
 
 const ApplyLeaveModel = ({ open, onClose, onSuccess }) => {
 
@@ -13,6 +15,17 @@ const ApplyLeaveModel = ({ open, onClose, onSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        const formDate = new FormData(e.currentTarget);
+        const data = Object.fromEntries(formDate.entries());
+
+        try {
+            await api.post('/leaves', data);
+            onSuccess();
+            onClose();
+        } catch (error) {
+            toast.error(error.response?.data?.error || error.message);
+        }
     }
 
     if (!open) return null;
@@ -66,7 +79,7 @@ const ApplyLeaveModel = ({ open, onClose, onSuccess }) => {
                     </div>
                     <div className="flex gap-3 pt-2">
                         <button onClick={onClose} type="button" className="btn-secondary flex-1">Cancel</button>
-                        <button onClick={onClose} disabled={loading} type="submit" className="btn-primary flex-1 flex items-center justify-center gap-2">
+                        <button disabled={loading} type="submit" className="btn-primary flex-1 flex items-center justify-center gap-2">
                             {loading ? <Loader2 className="animate-spin" /> : <Send className="w-4 h-4" />}
                             {loading ? "Submitting..." : "Submit"}
                         </button>

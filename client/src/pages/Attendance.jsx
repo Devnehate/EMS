@@ -6,6 +6,8 @@ import Loading from "../components/Loading";
 import CheckInButton from "../components/CheckInButton";
 import AttendanceStats from "../components/Attendance/AttendanceStats";
 import AttendanceHistory from "../components/Attendance/AttendanceHistory";
+import api from "../api/Axios";
+import {toast} from "react-hot-toast";
 
 const Attendance = () => {
 
@@ -14,17 +16,26 @@ const Attendance = () => {
   const [isDeleted, setIsDeleted] = useState(false);
 
   const fetchData = useCallback(async () => {
-    setHistory(dummyAttendanceData);
-    setTimeout(() => {
+    try {
+      const res = await api.get('/attendance')
+      const json = res.data;
+      setHistory(json.data || []);
+
+      if (json.employee.isDeleted) {
+        setIsDeleted(true);
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.error || error.message)
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   }, []);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  if(loading) return <Loading />
+  if (loading) return <Loading />
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -42,9 +53,9 @@ const Attendance = () => {
           <p className="text-rose-600">You can no longer clock in or out because your employee records have been marked for deleted.</p>
         </div>
       ) : (
-          <div className="mb-8">
-            <CheckInButton todayRecord={todayRecord} onAction={fetchData}/>
-          </div>
+        <div className="mb-8">
+          <CheckInButton todayRecord={todayRecord} onAction={fetchData} />
+        </div>
       )}
 
       <AttendanceStats history={history} />
