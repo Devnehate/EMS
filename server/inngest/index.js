@@ -8,22 +8,14 @@ export const inngest = new Inngest({
     id: "fullstack-ems",
 });
 
-
-// =====================================================
-// 1. AUTO CHECK-OUT
-// =====================================================
-
 const autoCheckOut = inngest.createFunction(
     {
         id: "auto-check-out",
         triggers: [{ event: "employee/check-out" }],
     },
-
     async ({ event, step }) => {
-
         const { employeeId, attendanceId } = event.data;
 
-        // Wait for 9 hours
         await step.sleepUntil(
             "wait-for-the-9-hours",
             new Date(Date.now() + 9 * 60 * 60 * 1000)
@@ -32,7 +24,6 @@ const autoCheckOut = inngest.createFunction(
         let attendance = await Attendance.findById(attendanceId);
 
         if (!attendance?.checkOut) {
-
             const employee = await Employee.findById(employeeId);
 
             if (!employee) {
@@ -41,17 +32,13 @@ const autoCheckOut = inngest.createFunction(
 
             await sendEmail({
                 to: employee.email,
-
                 subject: "Attendance Check-Out Reminder",
-
                 body: `
                     <div style="max-width: 600px;">
                         <h2>Hi ${employee.firstName}, 👋</h2>
-
                         <p style="font-size: 16px;">
                             You have a check-in in ${employee.department} today:
                         </p>
-
                         <p style="
                             font-size: 18px;
                             font-weight: bold;
@@ -60,21 +47,16 @@ const autoCheckOut = inngest.createFunction(
                         ">
                             ${attendance?.checkIn?.toLocaleTimeString() || ""}
                         </p>
-
                         <p style="font-size: 16px;">
                             Please make sure to check-out in one hour.
                         </p>
-
                         <p style="font-size: 16px;">
                             If you have any questions, please contact your admin.
                         </p>
-
                         <br />
-
                         <p style="font-size: 16px;">
                             Best regards,
                         </p>
-
                         <p style="font-size: 16px;">
                             EMS
                         </p>
@@ -82,7 +64,6 @@ const autoCheckOut = inngest.createFunction(
                 `,
             });
 
-            // Wait another 1 hour
             await step.sleepUntil(
                 "wait-for-the-1-hour",
                 new Date(Date.now() + 1 * 60 * 60 * 1000)
@@ -91,7 +72,6 @@ const autoCheckOut = inngest.createFunction(
             attendance = await Attendance.findById(attendanceId);
 
             if (attendance && !attendance.checkOut) {
-
                 attendance.checkOut = new Date(
                     new Date(attendance.checkIn).getTime() +
                     4 * 60 * 60 * 1000
@@ -107,22 +87,14 @@ const autoCheckOut = inngest.createFunction(
     }
 );
 
-
-// =====================================================
-// 2. LEAVE APPLICATION REMINDER
-// =====================================================
-
 const leaveApplicationReminder = inngest.createFunction(
     {
         id: "leave-application-reminder",
         triggers: [{ event: "leave/pending" }],
     },
-
     async ({ event, step }) => {
-
         const { leaveApplicationId } = event.data;
 
-        // Wait 24 hours
         await step.sleepUntil(
             "wait-for-the-24-hours",
             new Date(Date.now() + 24 * 60 * 60 * 1000)
@@ -132,7 +104,6 @@ const leaveApplicationReminder = inngest.createFunction(
             await LeaveApplication.findById(leaveApplicationId);
 
         if (leaveApplication?.status === "PENDING") {
-
             const employee =
                 await Employee.findById(leaveApplication.employeeId);
 
@@ -141,21 +112,15 @@ const leaveApplicationReminder = inngest.createFunction(
             }
 
             await sendEmail({
-
                 to: process.env.ADMIN_EMAIL,
-
                 subject: "Leave Application Reminder",
-
                 body: `
                     <div style="max-width: 600px;">
-
                         <h2>Hi Admin, 👋</h2>
-
                         <p style="font-size: 16px;">
                             You have a leave application in
                             ${employee.department} today:
                         </p>
-
                         <p style="
                             font-size: 18px;
                             font-weight: bold;
@@ -169,22 +134,17 @@ const leaveApplicationReminder = inngest.createFunction(
                                 : ""
                             }
                         </p>
-
                         <p style="font-size: 16px;">
                             Please make sure to take action on
                             this leave application.
                         </p>
-
                         <br />
-
                         <p style="font-size: 16px;">
                             Best regards,
                         </p>
-
                         <p style="font-size: 16px;">
                             EMS
                         </p>
-
                     </div>
                 `,
             });
@@ -192,32 +152,19 @@ const leaveApplicationReminder = inngest.createFunction(
     }
 );
 
-
-// =====================================================
-// 3. ATTENDANCE REMINDER CRON
-// =====================================================
-
 const attendanceReminderCron = inngest.createFunction(
     {
         id: "attendance-reminder-cron",
-
         triggers: [
             {
                 cron: "TZ=Asia/Kolkata 30 11 * * *",
             },
         ],
     },
-
     async ({ event, step }) => {
-
-        // =================================================
-        // GET TODAY'S DATE
-        // =================================================
-
         const today = await step.run(
             "get-today-date",
             async () => {
-
                 const dateString = new Date().toLocaleDateString(
                     "en-CA",
                     {
@@ -234,7 +181,6 @@ const attendanceReminderCron = inngest.createFunction(
                     24 * 60 * 60 * 1000
                 );
 
-                // Safety check
                 if (
                     Number.isNaN(startUTC.getTime()) ||
                     Number.isNaN(endUTC.getTime())
@@ -249,15 +195,9 @@ const attendanceReminderCron = inngest.createFunction(
             }
         );
 
-
-        // =================================================
-        // GET ACTIVE EMPLOYEES
-        // =================================================
-
         const activeEmployees = await step.run(
             "get-active-employees",
             async () => {
-
                 const employees = await Employee.find({
                     isDeleted: false,
                     employeeStatus: "ACTIVE",
@@ -273,22 +213,14 @@ const attendanceReminderCron = inngest.createFunction(
             }
         );
 
-
-        // =================================================
-        // GET EMPLOYEES ON LEAVE
-        // =================================================
-
         const onLeaveIds = await step.run(
             "get-on-leave-ids",
             async () => {
-
                 const leaves = await LeaveApplication.find({
                     status: "APPROVED",
-
                     startDate: {
                         $lte: new Date(today.endUTC),
                     },
-
                     endDate: {
                         $gte: new Date(today.startUTC),
                     },
@@ -300,19 +232,12 @@ const attendanceReminderCron = inngest.createFunction(
             }
         );
 
-
-        // =================================================
-        // GET EMPLOYEES WHO CHECKED IN
-        // =================================================
-
         const checkedInIds = await step.run(
             "get-checked-in-ids",
             async () => {
-
                 const attendances = await Attendance.find({
                     date: {
                         $gte: new Date(today.startUTC),
-
                         $lt: new Date(today.endUTC),
                     },
                 }).lean();
@@ -323,67 +248,45 @@ const attendanceReminderCron = inngest.createFunction(
             }
         );
 
-
-        // =================================================
-        // FIND ABSENT EMPLOYEES
-        // =================================================
-
         const absentEmployees = activeEmployees.filter(
             (employee) =>
                 !onLeaveIds.includes(employee.id) &&
                 !checkedInIds.includes(employee.id)
         );
 
-
-        // =================================================
-        // SEND ABSENT EMAILS
-        // =================================================
-
         if (absentEmployees.length > 0) {
-
             await step.run(
                 "send-absent-emails",
                 async () => {
-
                     const emailPromises =
                         absentEmployees.map((employee) => {
-
                             return sendEmail({
-
                                 to: employee.email,
-
                                 subject:
                                     "Attendance Reminder - please mark your attendance",
-
                                 body: `
                                     <div style="
                                         max-width: 600px;
                                         font-family: Arial, sans-serif;
                                     ">
-
                                         <h2>
                                             Hi ${employee.firstName}, 👋
                                         </h2>
-
                                         <p style="font-size: 16px;">
                                             We noticed you haven't marked
                                             your attendance yet today.
                                         </p>
-
                                         <p style="font-size: 16px;">
                                             The deadline was
                                             <strong>11:30 AM</strong>
                                             and your attendance is still missing.
                                         </p>
-
                                         <p style="font-size: 16px;">
                                             Please check in as soon as possible
                                             or contact your admin if you're
                                             facing any issues.
                                         </p>
-
                                         <br />
-
                                         <p style="
                                             font-size: 14px;
                                             color: #666;
@@ -391,17 +294,13 @@ const attendanceReminderCron = inngest.createFunction(
                                             Department:
                                             ${employee.department}
                                         </p>
-
                                         <br />
-
                                         <p style="font-size: 16px;">
                                             Best Regards,
                                         </p>
-
                                         <p style="font-size: 16px;">
                                             <strong>QuickEMS</strong>
                                         </p>
-
                                     </div>
                                 `,
                             });
@@ -416,27 +315,14 @@ const attendanceReminderCron = inngest.createFunction(
             );
         }
 
-
-        // =================================================
-        // RETURN SUMMARY
-        // =================================================
-
         return {
             totalActive: activeEmployees.length,
-
             onLeave: onLeaveIds.length,
-
             checkedIn: checkedInIds.length,
-
             absent: absentEmployees.length,
         };
     }
 );
-
-
-// =====================================================
-// EXPORT ALL INNGEST FUNCTIONS
-// =====================================================
 
 export const functions = [
     autoCheckOut,
